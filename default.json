@@ -1,0 +1,94 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "The dependency-update rules shared by every osdlc repository. Other accounts extend it as github>osdlc/renovate-config.",
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+  "schedule": ["before 6am on monday"],
+  "minimumReleaseAge": "7 days",
+  "internalChecksFilter": "strict",
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "platformCommit": "enabled",
+  "labels": ["dependencies"],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/vendor/**",
+    "**/examples/**",
+    "**/__tests__/**",
+    "**/test/**",
+    "**/tests/**",
+    "**/__fixtures__/**",
+    "**/dist/**",
+    ".agents/**",
+    ".claude/**",
+    ".claude-plugin/**",
+    ".cursor-plugin/**",
+    ".pi/**"
+  ],
+  "osvVulnerabilityAlerts": true,
+  "vulnerabilityAlerts": {
+    "labels": ["dependencies", "security"],
+    "minimumReleaseAge": null,
+    "schedule": ["at any time"]
+  },
+  "packageRules": [
+    {
+      "description": "Minor, patch, pin and digest updates go in one pull request a week.",
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "groupName": "non-major dependencies",
+      "groupSlug": "non-major"
+    },
+    {
+      "description": "A major update waits 30 days and gets a pull request of its own.",
+      "matchUpdateTypes": ["major"],
+      "minimumReleaseAge": "30 days"
+    },
+    {
+      "description": "Workflow action pins go in one pull request of their own.",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions",
+      "groupSlug": "github-actions"
+    },
+    {
+      "description": "Our own npm packages: no wait, one group, merged when the checks pass.",
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["@osdlc/**"],
+      "groupName": "osdlc packages",
+      "groupSlug": "osdlc",
+      "minimumReleaseAge": null,
+      "schedule": ["at any time"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": false
+    },
+    {
+      "description": "Anything else released from an osdlc repository (crates, actions) joins the same group.",
+      "matchSourceUrls": ["https://github.com/osdlc/**"],
+      "groupName": "osdlc packages",
+      "groupSlug": "osdlc",
+      "minimumReleaseAge": null,
+      "schedule": ["at any time"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": false
+    },
+    {
+      "description": "A workflow or action from an osdlc repository stays on the ref it names, such as main, rather than being pinned to a commit.",
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["osdlc/**"],
+      "pinDigests": false
+    },
+    {
+      "description": "The Node versions a workflow tests on are a choice, not a dependency.",
+      "matchManagers": ["github-actions"],
+      "matchDepNames": ["node"],
+      "enabled": false
+    },
+    {
+      "description": "@types/node follows the oldest Node a package supports, so its major is changed by hand.",
+      "matchPackageNames": ["@types/node"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    }
+  ]
+}

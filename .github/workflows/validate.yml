@@ -1,0 +1,34 @@
+# Checks default.json and config.js with Renovate's own validator, at the
+# Renovate version the renovate workflow runs.
+#
+# Every action is pinned to a commit SHA; the comment names its release.
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+
+      - name: Validate
+        run: npx --yes --package renovate@44.234.1 -- renovate-config-validator --strict default.json config.js
