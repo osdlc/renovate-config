@@ -22,7 +22,7 @@ The wait after a release is a supply-chain guard: a release that is pulled or fo
 
 - `default.json`: the update rules. Any repository, here or under another account, can use them with `"extends": ["github>osdlc/renovate-config"]`.
 - `config.js`: the runner's settings. It finds the repositories itself, needs no `renovate.json` in them and opens no onboarding pull request. It also keeps Renovate out of files another process writes, such as the generated plugin packs.
-- `.github/workflows/renovate.yml`: runs Renovate every four hours. A manual run is a dry run unless you uncheck it.
+- `.github/workflows/renovate.yml`: runs Renovate every four hours. A manual run is a dry run unless you uncheck it. Another account can call it too; see below.
 - `.github/workflows/validate.yml`: checks both files with Renovate's validator.
 
 ## Changing the rules for one repository
@@ -34,6 +34,40 @@ Add a `renovate.json` to that repository. Renovate applies it on top of these ru
 ```
 
 To leave a repository out, remove it from the app's installation.
+
+## Running it for another account
+
+The same job can process another account's repositories from a repository of that account, so its log and its runner minutes stay there. That matters for private repositories, because the log of a public repository's workflow is public, and Renovate's log names the repositories and dependencies it reads.
+
+Install the app on that account, add the same variable and secret to the repository, and give it a runner config and a workflow:
+
+```js
+// config.js
+module.exports = {
+  platform: 'github',
+  autodiscover: true,
+  onboarding: false,
+  requireConfig: 'optional',
+  extends: ['github>osdlc/renovate-config'],
+}
+```
+
+```yaml
+# .github/workflows/renovate.yml
+on:
+  schedule:
+    - cron: '43 5 * * *'
+  workflow_dispatch:
+jobs:
+  renovate:
+    uses: osdlc/renovate-config/.github/workflows/renovate.yml@main
+    with:
+      owner: ${{ github.repository_owner }}
+      config-file: config.js
+      client-id: ${{ vars.RENOVATE_APP_CLIENT_ID }}
+    secrets:
+      RENOVATE_APP_PRIVATE_KEY: ${{ secrets.RENOVATE_APP_PRIVATE_KEY }}
+```
 
 ## Setup
 
