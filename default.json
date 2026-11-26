@@ -19,11 +19,11 @@
     "**/tests/**",
     "**/__fixtures__/**",
     "**/dist/**",
-    ".agents/**",
-    ".claude/**",
-    ".claude-plugin/**",
-    ".cursor-plugin/**",
-    ".pi/**"
+    "**/.agents/**",
+    "**/.claude/**",
+    "**/.claude-plugin/**",
+    "**/.cursor-plugin/**",
+    "**/.pi/**"
   ],
   "osvVulnerabilityAlerts": true,
   "vulnerabilityAlerts": {
